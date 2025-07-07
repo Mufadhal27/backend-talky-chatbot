@@ -28,5 +28,12 @@
         }
       ]
     }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      "dest": "/chat.js"
+    }
   ]
 }
