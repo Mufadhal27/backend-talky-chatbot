@@ -5,6 +5,10 @@ if (!globalThis.fetch) globalThis.fetch = fetch;
 import mongoose from "mongoose";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+// --- DEBUGGING: Tambahkan ini di awal file ---
+console.log("Serverless function chat.js starting up...");
+// ---------------------------------------------
+
 // ====== MONGODB SETUP ======
 let cachedDb = null;
 
@@ -25,9 +29,9 @@ async function connectToDatabase() {
     const db = await mongoose.connect(MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      bufferCommands: false, // Menonaktifkan buffering perintah
-      serverSelectionTimeoutMS: 5000, // Timeout untuk server selection
-      socketTimeoutMS: 45000, // Timeout untuk operasi socket
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
     });
     cachedDb = db;
     console.log("✅ Terhubung ke MongoDB Atlas.");
@@ -39,13 +43,10 @@ async function connectToDatabase() {
 }
 
 // ====== SCHEMA ======
-// Definisi skema Mongoose untuk chat
 let Chat;
 try {
-  // Coba dapatkan model jika sudah terdaftar (untuk hot-reloading di dev)
   Chat = mongoose.model("Chat");
 } catch (error) {
-  // Jika belum, daftarkan model baru
   const chatSchema = new mongoose.Schema({
     prompt: String,
     reply: String,
@@ -55,7 +56,6 @@ try {
 }
 
 // ====== GEMINI SETUP ======
-// Mengambil API Key Gemini dari environment variable
 const API_KEY = process.env.GEMINI_API_KEY;
 
 if (!API_KEY) {
@@ -68,7 +68,7 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // ====== SERVERLESS FUNCTION HANDLER ======
 // Ini adalah fungsi utama yang akan diekspor dan dijalankan oleh Vercel
-export default async function handler(req, res) {
+async function handler(req, res) { 
   // Hanya izinkan permintaan POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: "Metode tidak diizinkan. Hanya POST yang didukung." });
@@ -113,3 +113,6 @@ export default async function handler(req, res) {
     }
   }
 }
+
+module.exports = handler;
+
