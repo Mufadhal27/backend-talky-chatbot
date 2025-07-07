@@ -67,7 +67,6 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // ====== SERVERLESS FUNCTION HANDLER ======
-// Ini adalah fungsi utama yang akan diekspor dan dijalankan oleh Vercel
 async function handler(req, res) { 
   // Hanya izinkan permintaan POST
   if (req.method !== 'POST') {
@@ -90,26 +89,21 @@ async function handler(req, res) {
   }
 
   try {
-    // Memulai sesi chat dengan Gemini
     const chat = model.startChat({ history: [] }); 
     const result = await chat.sendMessage(prompt);
     const response = await result.response;
     const reply = response.text();
 
-    // Simpan ke MongoDB
     const newChat = new Chat({ prompt, reply });
     await newChat.save();
 
-    // Mengirimkan balasan ke frontend
     res.status(200).json({ reply });
   } catch (error) {
     console.error("❌ Error Gemini atau simpan ke DB:", error);
-    // Penanganan error spesifik untuk kunci API
     if (error.message.includes("API key not valid")) {
         res.status(500).json({ error: "Terjadi masalah dengan kunci API Gemini. Harap periksa kunci Anda." });
     } else {
-      // Penanganan error umum
-      res.status(500).json({ error: "Gagal mendapatkan respon dari Gemini atau menyimpan chat." });
+            res.status(500).json({ error: "Gagal mendapatkan respon dari Gemini atau menyimpan chat." });
     }
   }
 }
