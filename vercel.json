@@ -2,12 +2,13 @@
   "builds": [
     {
       "src": "api/chat.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxLambdaSize": "15mb",
-        "memory": 256,
-        "runtime": "nodejs20.x"
-      }
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/chat",
+      "dest": "api/chat.js"
     }
   ],
   "headers": [
