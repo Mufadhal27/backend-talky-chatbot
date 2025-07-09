@@ -1,0 +1,12 @@
+{
+  "name": "backend-talky-chatbot",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node chat.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.7.0",
+    "node-fetch": "^3.3.2"
+  }
+}
