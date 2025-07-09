@@ -1,4 +1,5 @@
 {
+  "version": 2,
   "builds": [
     {
       "src": "api/chat.js",
@@ -8,6 +9,12 @@
         "memory": 256,
         "runtime": "nodejs20.x"
       }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/chat",
+      "dest": "api/chat.js"
     }
   ],
   "headers": [
