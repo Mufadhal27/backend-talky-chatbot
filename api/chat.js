@@ -1,19 +1,13 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import fetch from "node-fetch";
 if (!globalThis.fetch) globalThis.fetch = fetch;
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const API_KEY = process.env.GEMINI_API_KEY;
-if (!API_KEY) {
-  throw new Error("❌ GEMINI_API_KEY tidak ditemukan.");
-}
-
-const genAI = new GoogleGenerativeAI(API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Hanya menerima metode POST." });
+    return res.status(405).json({ error: "Metode tidak diizinkan. Gunakan POST." });
   }
 
   const { prompt } = req.body;
@@ -24,12 +18,10 @@ export default async function handler(req, res) {
   try {
     const chat = model.startChat({ history: [] });
     const result = await chat.sendMessage(prompt);
-    const response = await result.response;
-    const reply = response.text();
-
-    return res.status(200).json({ reply });
+    const reply = (await result.response).text();
+    res.status(200).json({ reply });
   } catch (error) {
     console.error("❌ Error:", error);
-    return res.status(500).json({ error: "Gagal mengambil respon dari Gemini." });
+    res.status(500).json({ error: "Gagal memproses permintaan." });
   }
 }
