@@ -3,46 +3,32 @@ if (!globalThis.fetch) globalThis.fetch = fetch;
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export const config = {
-  runtime: "edge",
-};
-
 const API_KEY = process.env.GEMINI_API_KEY;
 if (!API_KEY) {
-  throw new Error("❌ GEMINI_API_KEY tidak ditemukan.");
+  throw new Error("GEMINI_API_KEY tidak ditemukan.");
 }
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-export default async function handler(req) {
-  const headers = {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*", // Ganti dengan frontend URL jika perlu
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-  };
-
-  // 💡 Handle preflight request (CORS OPTIONS)
+export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers });
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    return res.status(200).end();
   }
+
+  res.setHeader("Access-Control-Allow-Origin", "*");
 
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Metode tidak diizinkan. Hanya POST." }), {
-      status: 405,
-      headers,
-    });
+    return res.status(405).json({ error: "Hanya POST yang diizinkan." });
   }
 
-  const body = await req.json();
-  const { prompt } = body;
+  const { prompt } = req.body;
 
   if (!prompt) {
-    return new Response(JSON.stringify({ error: "Prompt tidak ditemukan." }), {
-      status: 400,
-      headers,
-    });
+    return res.status(400).json({ error: "Prompt tidak ditemukan." });
   }
 
   try {
@@ -51,15 +37,8 @@ export default async function handler(req) {
     const response = await result.response;
     const reply = response.text();
 
-    return new Response(JSON.stringify({ reply }), {
-      status: 200,
-      headers,
-    });
+    return res.status(200).json({ reply });
   } catch (error) {
-    console.error("❌ Error Gemini:", error);
-    return new Response(JSON.stringify({ error: "Gagal mengambil respon dari Gemini." }), {
-      status: 500,
-      headers,
-    });
+    return res.status(500).json({ error: "Gagal mengambil respon dari Gemini." });
   }
 }
